@@ -30,6 +30,8 @@ def about():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('secure_page'))
     form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
         # change this to actually validate the entire form submission
@@ -50,15 +52,18 @@ def login():
 
             # get user id, load into session
                 login_user(user)
-            flash("Logged in Successfully.", "success")
+                flash("Logged in Successfully.", "success")
             # remember to flash a message to the user
-            return redirect(url_for("secure-page"))  # they should be redirected to a secure-page route instead
-        else:
-            flash("Username or Password incorrect", "danger")
-    flash_errors(form)
+                return redirect(url_for("secure_page"))  # they should be redirected to a secure-page route instead
+            else:
+                flash("Username or Password incorrect", "danger")
+    
     return render_template("login.html", form=form)
 
-
+@app.route("/secure-page")
+@login_required
+def secure_page():
+    return render_template("secure_page.html")
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
 @login_manager.user_loader
